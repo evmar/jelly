@@ -1,0 +1,145 @@
+levels = [
+  [ "xxxxxxxxxxxxxx",
+    "x            x",
+    "x      r     x",
+    "x      xx    x",
+    "x  g     r b x",
+    "xxbxxxg xxxxxx",
+    "xxxxxxxxxxxxxx", ],
+
+  [ "xxxxxxxxxxxxxx",
+    "x            x",
+    "x            x",
+    "x     g   g  x",
+    "x   r r   r  x",
+    "xxxxx x x xxxx",
+    "xxxxxxxxxxxxxx", ],
+  ]
+
+CELL_SIZE = 24
+
+class Stage
+  constructor: (@dom, map) ->
+    @busy = false
+    @jellies = []
+    @cells = @loadMap(map)
+    @dom.style.height = CELL_SIZE * @cells.length + 'px'
+    @dom.style.width = CELL_SIZE * @cells[0].length + 'px'
+
+    maybeSwallowEvent = (e) =>
+      e.preventDefault()
+      e.stopPropagation() if @busy
+
+    for event in ['contextmenu', 'click']
+      @dom.addEventListener(event, maybeSwallowEvent, true)
+
+  loadMap: (map) ->
+    for y in [0...map.length]
+      row = map[y].split(//)
+      for x in [0...row.length]
+        jelly = null
+        cell = switch row[x]
+          when 'x' then new Wall(x, y)
+          when 'r' then jelly = new Jelly(this, x, y, 'red')
+          when 'g' then jelly = new Jelly(this, x, y, 'green')
+          when 'b' then jelly = new Jelly(this, x, y, 'blue')
+          when ' ' then null
+        @dom.appendChild(cell.dom) if cell
+        @jellies.push jelly if jelly
+        cell
+
+  trySlide: (jelly, dir) ->
+    return if @cells[jelly.y][jelly.x + dir]
+    return if jelly.stuck
+    @busy = true
+    jelly.slide dir, () =>
+      @move(jelly, jelly.x + dir, jelly.y)
+      @checkFall()
+      @checkStuck()
+      @busy = false
+
+  move: (jelly, x, y) ->
+    @cells[jelly.y][jelly.x] = null
+    jelly.updatePosition(x, y)
+    @cells[y][x] = jelly
+
+  checkFall: () ->
+    moved = true
+    while moved
+      moved = false
+      for jelly in @jellies
+        continue if @cells[jelly.y + 1][jelly.x]
+        @move(jelly, jelly.x, jelly.y + 1)
+        moved = true
+
+  checkStuck: () ->
+    stuck = true
+    while stuck
+      stuck = false
+      for jelly in @jellies
+        # Only look left and up; right and down are handled by that side
+        # itself looking left and up.
+        for [dx, dy] in [[-1, 0], [0, -1]]
+          other = @cells[jelly.y + dy][jelly.x + dx]
+          # Is there a Jelly nearby?
+          continue unless other and other instanceof Jelly
+          # Is it of the same color?
+          continue unless jelly.color == other.color
+          # Is it already stuck to us?
+          continue if jelly.stuck and jelly.stuck == other.stuck
+          jelly.stickTo other
+          stuck = true
+
+class Cell
+  constructor: (x, y) ->
+    @dom = document.createElement('div')
+    @dom.style.left = x * CELL_SIZE
+    @dom.style.top = y * CELL_SIZE
+    @dom.classList.add 'cell'
+
+class Wall extends Cell
+  constructor: (x, y) ->
+    super(x, y)
+    @dom.classList.add 'wall'
+
+class Jelly extends Cell
+  constructor: (stage, @x, @y, @color) ->
+    super(@x, @y)
+
+    @stuck = null
+
+    @displayDom = document.createElement('div')
+    @displayDom.className = 'cell jelly ' + @color
+    @dom.appendChild(@displayDom)
+
+    @dom.addEventListener 'contextmenu', (e) =>
+      stage.trySlide(this, 1)
+    @dom.addEventListener 'click', (e) =>
+      stage.trySlide(this, -1)
+
+  slide: (dir, cb) ->
+    end = () =>
+      @displayDom.style.webkitAnimation = ''
+      @displayDom.removeEventListener 'webkitAnimationEnd', end
+      cb()
+    @displayDom.addEventListener 'webkitAnimationEnd', end
+    @displayDom.style.webkitAnimation = '300ms ease-out'
+    if dir == 1
+      @displayDom.style.webkitAnimationName = 'slideRight'
+    else
+      @displayDom.style.webkitAnimationName = 'slideLeft'
+
+  updatePosition: (@x, @y) ->
+    @dom.style.left = @x * CELL_SIZE
+    @dom.style.top = @y * CELL_SIZE
+
+  stickTo: (other) ->
+    this.stuck = [this] if not this.stuck
+    other.stuck = [other] if not other.stuck
+
+    other.stuck = other.stuck.concat @stuck
+    for jelly in @stuck
+      jelly.stuck = other.stuck
+
+stage = new Stage(document.getElementById('stage'), levels[0])
+window.stage = stage

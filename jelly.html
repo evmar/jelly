@@ -1,0 +1,69 @@
+<style>
+#stage {
+  position: relative;
+  user-select: none;
+}
+.cell {
+  position: absolute;
+  box-sizing: border-box;
+  width: 24px;
+  height: 24px;
+}
+.wall {
+  background: #aaa;
+}
+.jelly {
+  border: solid 1px black;
+  cursor: ew-resize;
+}
+.red {
+  background: #f77;
+}
+.blue {
+  background: #59f;
+}
+.green {
+  background: #0e0;
+}
+
+@-webkit-keyframes slideRight {
+  0% {
+    left: 0;
+    -webkit-transform: none;
+  }
+  70% {
+    left: 24px;
+    -webkit-transform: skew(-10deg, 0);
+  }
+  80% {
+    left: 22px;
+    -webkit-transform: skew(5deg, 0);
+  }
+  100% {
+    left: 24px;
+    -webkit-transform: none;
+  }
+}
+@-webkit-keyframes slideLeft {
+  0% {
+    left: 0;
+    -webkit-transform: none;
+  }
+  70% {
+    left: -24px;
+    -webkit-transform: skew(10deg, 0);
+  }
+  80% {
+    left: -22px;
+    -webkit-transform: skew(-5deg, 0);
+  }
+  100% {
+    left: -24px;
+    -webkit-transform: none;
+  }
+}
+</style>
+jelly
+
+<div id='stage'></div>
+<script src='jelly.js'></script>
