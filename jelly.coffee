@@ -23,8 +23,6 @@ class Stage
     @busy = false
     @jellies = []
     @cells = @loadMap(map)
-    @dom.style.height = CELL_SIZE * @cells.length + 'px'
-    @dom.style.width = CELL_SIZE * @cells[0].length + 'px'
 
     maybeSwallowEvent = (e) =>
       e.preventDefault()
@@ -34,18 +32,31 @@ class Stage
       @dom.addEventListener(event, maybeSwallowEvent, true)
 
   loadMap: (map) ->
+    table = document.createElement('table')
+    @dom.appendChild(table)
     for y in [0...map.length]
       row = map[y].split(//)
+      tr = document.createElement('tr')
+      table.appendChild(tr)
       for x in [0...row.length]
-        jelly = null
-        cell = switch row[x]
-          when 'x' then new Wall(x, y)
-          when 'r' then jelly = new Jelly(this, x, y, 'red')
-          when 'g' then jelly = new Jelly(this, x, y, 'green')
-          when 'b' then jelly = new Jelly(this, x, y, 'blue')
-          when ' ' then null
-        @dom.appendChild(cell.dom) if cell
-        @jellies.push jelly if jelly
+        color = null
+        cell = null
+        switch row[x]
+          when 'x'
+            cell = document.createElement('td')
+            cell.className = 'cell wall'
+            tr.appendChild(cell)
+          when 'r' then color = 'red'
+          when 'g' then color = 'green'
+          when 'b' then color = 'blue'
+
+        unless cell
+          tr.appendChild(document.createElement('td'))
+        if color
+          jelly = new Jelly(this, x, y, color)
+          @dom.appendChild(jelly.dom)
+          @jellies.push jelly
+          cell = jelly
         cell
 
   trySlide: (jelly, dir) ->
@@ -90,23 +101,14 @@ class Stage
           jelly.stickTo other
           stuck = true
 
-class Cell
-  constructor: (x, y) ->
+class Jelly
+  constructor: (stage, @x, @y, @color) ->
+    @stuck = null
+
     @dom = document.createElement('div')
     @dom.style.left = x * CELL_SIZE
     @dom.style.top = y * CELL_SIZE
-    @dom.classList.add 'cell'
-
-class Wall extends Cell
-  constructor: (x, y) ->
-    super(x, y)
-    @dom.classList.add 'wall'
-
-class Jelly extends Cell
-  constructor: (stage, @x, @y, @color) ->
-    super(@x, @y)
-
-    @stuck = null
+    @dom.className = 'cell jellybox'
 
     @displayDom = document.createElement('div')
     @displayDom.className = 'cell jelly ' + @color

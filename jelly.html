@@ -2,17 +2,25 @@
 #stage {
   position: relative;
   user-select: none;
+  display: inline-block;
+  border: solid 1px black;
+}
+#stage table {
+  border-spacing: 0;
 }
 .cell {
-  position: absolute;
-  box-sizing: border-box;
   width: 24px;
   height: 24px;
+  box-sizing: border-box;
 }
 .wall {
   background: #aaa;
 }
+.jellybox {
+  position: absolute;
+}
 .jelly {
+  position: absolute;
   border: solid 1px black;
   cursor: ew-resize;
 }
@@ -63,7 +71,7 @@
   }
 }
 </style>
-jelly
+<h1>jelly</h1>
 
 <div id='stage'></div>
 <script src='jelly.js'></script>
