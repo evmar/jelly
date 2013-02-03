@@ -231,10 +231,14 @@ class Jelly
     return
 
 level = parseInt(location.search.substr(1), 10) or 0
-stage = new Stage(document.getElementById('stage'), levels[level])
+stage = new Stage(document.getElementById('map'), levels[level])
 window.stage = stage
 
 levelPicker = document.getElementById('level')
 levelPicker.value = level
 levelPicker.addEventListener 'change', () ->
   location.search = '?' + levelPicker.value
+
+document.getElementById('reset').addEventListener 'click', ->
+  stage.dom.innerHTML = ''
+  stage = new Stage(stage.dom, levels[level])

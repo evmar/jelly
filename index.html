@@ -13,17 +13,23 @@ body {
 h1 {
   font-weight: normal;
 }
+#stage {
+  position: relative;
+  user-select: none;
+  display: inline-block;
+  border: solid 1px #777;
+}
 select#level {
   position: absolute;
   top: 8px;
   right: 8px;
   font: inherit;
 }
-#stage {
-  position: relative;
-  user-select: none;
-  display: inline-block;
-  border: solid 1px #777;
+#reset {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  font: inherit;
 }
 #stage table {
   border-spacing: 0;
@@ -108,12 +114,14 @@ can run the Windows version I highly recommend it as it has a lot of
 great extra details.</p>
 
 <div id='stage'>
+<div id='map'></div>
 <select id='level'>
   <option value='0'>Level 1</option>
   <option value='1'>Level 2</option>
   <option value='2'>Level 3 [broken]</option>
   <option value='3'>Level 4</option>
 </select>
+<button id='reset'>Reset</button>
 </div>
 
 <p>How to play: left and right mouse button moves jellies left and
