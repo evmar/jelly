@@ -81,8 +81,7 @@ class Stage
           cell.style[attr] = border unless other and other.tagName == 'TD'
 
   trySlide: (jelly, dir) ->
-    return if @cells[jelly.y][jelly.x + dir]
-    return if jelly.stuck
+    return unless @checkOpen(jelly, dir, 0)
     @busy = true
     @move(jelly, jelly.x + dir, jelly.y)
     jelly.slide dir, () =>
@@ -91,18 +90,26 @@ class Stage
       @busy = false
 
   move: (jelly, x, y) ->
-    @cells[jelly.y][jelly.x] = null
+    for cell in jelly.cells
+      @cells[jelly.y + cell.y][jelly.x + cell.x] = null
     jelly.updatePosition(x, y)
-    @cells[y][x] = jelly
+    for cell in jelly.cells
+      @cells[jelly.y + cell.y][jelly.x + cell.x] = jelly
+
+  checkOpen: (jelly, dx, dy) ->
+    for cell in jelly.cells
+      next = @cells[jelly.y + cell.y + dy][jelly.x + cell.x + dx]
+      return false if next and next != jelly
+    return true
 
   checkFall: () ->
     moved = true
     while moved
       moved = false
       for jelly in @jellies
-        continue if @cells[jelly.y + 1][jelly.x]
-        @move(jelly, jelly.x, jelly.y + 1)
-        moved = true
+        if @checkOpen(jelly, 0, 1)
+          @move(jelly, jelly.x, jelly.y + 1)
+          moved = true
 
   checkStuck: () ->
     loop
