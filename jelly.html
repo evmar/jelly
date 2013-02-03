@@ -1,15 +1,22 @@
 <!DOCTYPE html>
 <html>
 <head>
+<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
 <style>
 body {
-  line-height: 1.7em;
+  line-height: 1.6em;
   max-width: 674px;
   margin: 4ex;
-  font-family: sans-serif;
+  font-family: 'Open Sans', sans-serif;
 }
 h1 {
   font-weight: normal;
+}
+select#level {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font: inherit;
 }
 #stage {
   position: relative;
@@ -19,14 +26,23 @@ h1 {
 }
 #stage table {
   border-spacing: 0;
+  background: #ccc;
+  background-size: 36px 36px;
+  background-image: -webkit-linear-gradient(-45deg,
+    #ccc 25%, #bbb 25%, #bbb 50%, #ccc 50%, #ccc 75%, #bbb 75%);
+}
+#stage table td {
+  padding: 0;
 }
 .cell {
   width: 48px;
   height: 48px;
   box-sizing: border-box;
 }
+.transparent {
+  background: #eef7ff;
+}
 .wall {
-  background: #ccc;
 }
 .jellybox {
   position: absolute;
@@ -83,18 +99,34 @@ h1 {
 <body>
 <h1>jelly</h1>
 
-<p>This is an HTML5 clone
+<p>This is a (WebKit-only*) HTML5 clone
 of <a href='http://qrostar.skr.jp/index.cgi?page=jelly&lang=en'>Jelly
-no Puzzle</a>, an excellent puzzle game that is Windows only.  The
-game design, levels, and even colors are borrowed directly from
-that. If you can run the Windows version I highly recommend it as it
-has a lot of great extra details.</p>
+no Puzzle</a>, an excellent puzzle game that was released for Windows
+only.  The game design and levels are taken directly from that. If you
+can run the Windows version I highly recommend it as it has a lot of
+great extra details.</p>
 
-<div id='stage'></div>
+<div id='stage'>
+<select id='level'>
+  <option value='0'>Level 1</option>
+  <option value='1'>Level 2</option>
+  <option value='2'>Level 3 [broken]</option>
+  <option value='3'>Level 4</option>
+</select>
+</div>
 
 <p>How to play: left and right mouse button moves jellies left and
   right.  When jellies of the same color touch they merge.
   Your objective is to unify all jellies of the same color.</p>
+
+<p>To be implemented:
+  <ol>
+    <li>Pushing of blocks (necessary for level 3).</li>
+    <li>A "you win" screen when you win.</li>
+</ol></p>
+
+<p><small>* It is WebKit-only because CSS prefixes are dumb and I
+  don't have the patience to test on other browsers.</small></p>
 
 <script src='jelly.js'></script>
 </body>

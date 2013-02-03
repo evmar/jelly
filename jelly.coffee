@@ -79,7 +79,9 @@ class Stage
           when 'b' then color = 'blue'
 
         unless cell
-          tr.appendChild(document.createElement('td'))
+          td = document.createElement('td')
+          td.className = 'transparent'
+          tr.appendChild(td)
         if color
           jelly = new Jelly(this, x, y, color)
           @dom.appendChild(jelly.dom)
@@ -94,7 +96,7 @@ class Stage
       for x in [0...@cells[0].length]
         cell = @cells[y][x]
         continue unless cell and cell.tagName == 'TD'
-        border = 'solid 1px #aaa'
+        border = 'solid 1px #777'
         edges = [
           ['borderBottom',  0,  1],
           ['borderTop',     0, -1],
@@ -228,5 +230,11 @@ class Jelly
           cell.dom.style.borderTop = 'none'
     return
 
-stage = new Stage(document.getElementById('stage'), levels[0])
+level = parseInt(location.search.substr(1), 10) or 0
+stage = new Stage(document.getElementById('stage'), levels[level])
 window.stage = stage
+
+levelPicker = document.getElementById('level')
+levelPicker.value = level
+levelPicker.addEventListener 'change', () ->
+  location.search = '?' + levelPicker.value
