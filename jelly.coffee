@@ -31,6 +31,8 @@ class Stage
     for event in ['contextmenu', 'click']
       @dom.addEventListener(event, maybeSwallowEvent, true)
 
+    @checkStuck()
+
   loadMap: (map) ->
     table = document.createElement('table')
     @dom.appendChild(table)
@@ -103,35 +105,48 @@ class Stage
         moved = true
 
   checkStuck: () ->
-    stuck = true
-    while stuck
-      stuck = false
-      for jelly in @jellies
-        # Only look left and up; right and down are handled by that side
-        # itself looking left and up.
-        for [dx, dy] in [[-1, 0], [0, -1]]
-          other = @cells[jelly.y + dy][jelly.x + dx]
+    loop
+      console.log('examining ' + @jellies.length + ' jellies', @jellies)
+      jelly = @doOneMerge()
+      return unless jelly
+      for cell in jelly.cells
+        @cells[jelly.y + cell.y][jelly.x + cell.x] = jelly
+
+  doOneMerge: () ->
+    for jelly in @jellies
+      console.log('examining jelly', jelly)
+      for cell in jelly.cells
+        # Only look right and down; left and up are handled by that side
+        # itself looking right and down.
+        for [dx, dy] in [[1, 0], [0, 1]]
           # Is there a Jelly nearby?
+          other = @cells[jelly.y + cell.y + dy][jelly.x + cell.x + dx]
           continue unless other and other instanceof Jelly
+          continue unless other != jelly
           # Is it of the same color?
           continue unless jelly.color == other.color
-          # Is it already stuck to us?
-          continue if jelly.stuck and jelly.stuck == other.stuck
-          jelly.stickTo other
-          stuck = true
+          jelly.merge other
+          @jellies = @jellies.filter (j) -> j != other
+          console.log('new jellies ', @jellies.length)
+          return jelly
+    return null
+
+class JellyCell
+  constructor: (@jelly, @x, @y, color) ->
+    @dom = document.createElement('div')
+    @dom.className = 'cell jelly ' + color
+
 
 class Jelly
   constructor: (stage, @x, @y, @color) ->
-    @stuck = null
-
     @dom = document.createElement('div')
     @dom.style.left = x * CELL_SIZE
     @dom.style.top = y * CELL_SIZE
     @dom.className = 'cell jellybox'
 
-    @displayDom = document.createElement('div')
-    @displayDom.className = 'cell jelly ' + @color
-    @dom.appendChild(@displayDom)
+    cell = new JellyCell(this, 0, 0, @color)
+    @dom.appendChild(cell.dom)
+    @cells = [cell]
 
     @dom.addEventListener 'contextmenu', (e) =>
       stage.trySlide(this, 1)
@@ -140,41 +155,46 @@ class Jelly
 
   slide: (dir, cb) ->
     end = () =>
-      @displayDom.style.webkitAnimation = ''
-      @displayDom.removeEventListener 'webkitAnimationEnd', end
+      @dom.style.webkitAnimation = ''
+      @dom.removeEventListener 'webkitAnimationEnd', end
       cb()
-    @displayDom.addEventListener 'webkitAnimationEnd', end
-    @displayDom.style.webkitAnimation = '400ms ease-out'
+    @dom.addEventListener 'webkitAnimationEnd', end
+    @dom.style.webkitAnimation = '400ms ease-out'
     if dir == 1
-      @displayDom.style.webkitAnimationName = 'slideRight'
+      @dom.style.webkitAnimationName = 'slideRight'
     else
-      @displayDom.style.webkitAnimationName = 'slideLeft'
+      @dom.style.webkitAnimationName = 'slideLeft'
 
   updatePosition: (@x, @y) ->
     @dom.style.left = @x * CELL_SIZE
     @dom.style.top = @y * CELL_SIZE
 
-  stickTo: (other) ->
-    this.stuck = [this] if not this.stuck
-    other.stuck = [other] if not other.stuck
+  merge: (other) ->
+    dx = other.x - this.x
+    dy = other.y - this.y
 
-    other.stuck = other.stuck.concat @stuck
-    for jelly in @stuck
-      jelly.stuck = other.stuck
+    for cell in other.cells
+      @cells.push cell
+      cell.x += dx
+      cell.y += dy
+      cell.dom.style.left = cell.x * CELL_SIZE
+      cell.dom.style.top = cell.y * CELL_SIZE
+      @dom.appendChild(cell.dom)
+    other.cells = null
+    other.dom.parentNode.removeChild(other.dom)
 
     # Remove internal borders.
-    for jelly in @stuck
-      for other in @stuck
-        continue if other == jelly
-        console.log(@stuck, jelly, other)
-        if other.x == jelly.x + 1 and other.y == jelly.y
-          jelly.displayDom.style.borderRight = 'none'
-        else if other.x == jelly.x - 1 and other.y == jelly.y
-          jelly.displayDom.style.borderLeft = 'none'
-        else if other.x == jelly.x and other.y == jelly.y + 1
-          jelly.displayDom.style.borderBottom = 'none'
-        else if other.x == jelly.x and other.y == jelly.y - 1
-          jelly.displayDom.style.borderTop = 'none'
+    for cell in @cells
+      for othercell in @cells
+        continue if othercell == cell
+        if othercell.x == cell.x + 1 and othercell.y == cell.y
+          cell.dom.style.borderRight = 'none'
+        else if othercell.x == cell.x - 1 and othercell.y == cell.y
+          cell.dom.style.borderLeft = 'none'
+        else if othercell.x == cell.x and othercell.y == cell.y + 1
+          cell.dom.style.borderBottom = 'none'
+        else if othercell.x == cell.x and othercell.y == cell.y - 1
+          cell.dom.style.borderTop = 'none'
 
 stage = new Stage(document.getElementById('stage'), levels[0])
 window.stage = stage
