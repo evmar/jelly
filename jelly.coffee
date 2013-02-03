@@ -82,8 +82,8 @@ class Stage
     return if @cells[jelly.y][jelly.x + dir]
     return if jelly.stuck
     @busy = true
+    @move(jelly, jelly.x + dir, jelly.y)
     jelly.slide dir, () =>
-      @move(jelly, jelly.x + dir, jelly.y)
       @checkFall()
       @checkStuck()
       @busy = false

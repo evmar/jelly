@@ -18,6 +18,8 @@
 }
 .jellybox {
   position: absolute;
+  -webkit-transition-property: left;
+  -webkit-transition-duration: 300ms;
 }
 .jelly {
   position: absolute;
@@ -38,37 +40,29 @@
 
 @-webkit-keyframes slideRight {
   0% {
-    left: 0;
     -webkit-transform: none;
   }
   70% {
-    left: 48px;
     -webkit-transform: skew(-10deg, 0);
   }
   80% {
-    left: 46px;
     -webkit-transform: skew(5deg, 0);
   }
   100% {
-    left: 48px;
     -webkit-transform: none;
   }
 }
 @-webkit-keyframes slideLeft {
   0% {
-    left: 0;
     -webkit-transform: none;
   }
   70% {
-    left: -48px;
     -webkit-transform: skew(10deg, 0);
   }
   80% {
-    left: -46px;
     -webkit-transform: skew(-5deg, 0);
   }
   100% {
-    left: -48px;
     -webkit-transform: none;
   }
 }
