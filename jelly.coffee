@@ -112,29 +112,22 @@ class Stage
           moved = true
 
   checkStuck: () ->
-    loop
-      console.log('examining ' + @jellies.length + ' jellies', @jellies)
-      jelly = @doOneMerge()
-      return unless jelly
+    while jelly = @doOneMerge()
       for cell in jelly.cells
         @cells[jelly.y + cell.y][jelly.x + cell.x] = jelly
 
   doOneMerge: () ->
     for jelly in @jellies
-      console.log('examining jelly', jelly)
       for cell in jelly.cells
         # Only look right and down; left and up are handled by that side
         # itself looking right and down.
         for [dx, dy] in [[1, 0], [0, 1]]
-          # Is there a Jelly nearby?
           other = @cells[jelly.y + cell.y + dy][jelly.x + cell.x + dx]
           continue unless other and other instanceof Jelly
           continue unless other != jelly
-          # Is it of the same color?
           continue unless jelly.color == other.color
           jelly.merge other
           @jellies = @jellies.filter (j) -> j != other
-          console.log('new jellies ', @jellies.length)
           return jelly
     return null
 
