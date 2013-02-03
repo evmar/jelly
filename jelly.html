@@ -3,8 +3,8 @@
 <head>
 <style>
 body {
-  max-width: 800px;
   line-height: 1.7em;
+  max-width: 674px;
   margin: 4ex;
   font-family: sans-serif;
 }
@@ -54,10 +54,10 @@ h1 {
   0% {
     -webkit-transform: none;
   }
-  70% {
+  50% {
     -webkit-transform: skew(-10deg, 0);
   }
-  80% {
+  60% {
     -webkit-transform: skew(5deg, 0);
   }
   100% {
@@ -68,10 +68,10 @@ h1 {
   0% {
     -webkit-transform: none;
   }
-  70% {
+  50% {
     -webkit-transform: skew(10deg, 0);
   }
-  80% {
+  60% {
     -webkit-transform: skew(-5deg, 0);
   }
   100% {
@@ -86,9 +86,16 @@ h1 {
 <p>This is an HTML5 clone
 of <a href='http://qrostar.skr.jp/index.cgi?page=jelly&lang=en'>Jelly
 no Puzzle</a>, an excellent puzzle game that is Windows only.  The
-game design, levels, and even colors are borrowed directly from that.</p>
+game design, levels, and even colors are borrowed directly from
+that. If you can run the Windows version I highly recommend it as it
+has a lot of great extra details.</p>
 
 <div id='stage'></div>
+
+<p>How to play: left and right mouse button moves jellies left and
+  right.  When jellies of the same color touch they merge.
+  Your objective is to unify all jellies of the same color.</p>
+
 <script src='jelly.js'></script>
 </body>
 </html>

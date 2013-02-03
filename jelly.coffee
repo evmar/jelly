@@ -190,7 +190,7 @@ class Jelly
       @dom.removeEventListener 'webkitAnimationEnd', end
       cb()
     @dom.addEventListener 'webkitAnimationEnd', end
-    @dom.style.webkitAnimation = '400ms ease-out'
+    @dom.style.webkitAnimation = '300ms ease-out'
     if dir == 1
       @dom.style.webkitAnimationName = 'slideRight'
     else
