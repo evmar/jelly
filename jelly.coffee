@@ -40,6 +40,10 @@ levels = [
 
 CELL_SIZE = 48
 
+moveToCell = (dom, x, y) ->
+  dom.style.left = x * CELL_SIZE + 'px'
+  dom.style.top = y * CELL_SIZE + 'px'
+
 class Stage
   constructor: (@dom, map) ->
     @busy = false
@@ -162,8 +166,7 @@ class JellyCell
 class Jelly
   constructor: (stage, @x, @y, @color) ->
     @dom = document.createElement('div')
-    @dom.style.left = x * CELL_SIZE
-    @dom.style.top = y * CELL_SIZE
+    @updatePosition(@x, @y)
     @dom.className = 'cell jellybox'
 
     cell = new JellyCell(this, 0, 0, @color)
@@ -188,8 +191,7 @@ class Jelly
       @dom.style.webkitAnimationName = 'slideLeft'
 
   updatePosition: (@x, @y) ->
-    @dom.style.left = @x * CELL_SIZE
-    @dom.style.top = @y * CELL_SIZE
+    moveToCell @dom, @x, @y
 
   merge: (other) ->
     dx = other.x - this.x
@@ -199,8 +201,7 @@ class Jelly
       @cells.push cell
       cell.x += dx
       cell.y += dy
-      cell.dom.style.left = cell.x * CELL_SIZE
-      cell.dom.style.top = cell.y * CELL_SIZE
+      moveToCell cell.dom, cell.x, cell.y
       @dom.appendChild(cell.dom)
     other.cells = null
     other.dom.parentNode.removeChild(other.dom)
