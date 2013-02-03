@@ -87,6 +87,7 @@ class Stage
           cell = jelly
         cell
     @addBorders()
+    return
 
   addBorders: () ->
     for y in [0...@cells.length]
@@ -105,6 +106,7 @@ class Stage
           continue unless 0 <= (x+dx) < @cells[0].length
           other = @cells[y+dy][x+dx]
           cell.style[attr] = border unless other and other.tagName == 'TD'
+    return
 
   trySlide: (jelly, dir) ->
     return if @checkFilled(jelly, dir, 0)
@@ -115,16 +117,15 @@ class Stage
       @checkStuck()
       @busy = false
 
-  move: (jelly, x, y) ->
-    for cell in jelly.cells
-      @cells[jelly.y + cell.y][jelly.x + cell.x] = null
-    jelly.updatePosition(x, y)
-    for cell in jelly.cells
-      @cells[jelly.y + cell.y][jelly.x + cell.x] = jelly
+  move: (jelly, targetX, targetY) ->
+    @cells[y][x] = null for [x, y] in jelly.cellCoords()
+    jelly.updatePosition(targetX, targetY)
+    @cells[y][x] = jelly for [x, y] in jelly.cellCoords()
+    return
 
   checkFilled: (jelly, dx, dy) ->
-    for cell in jelly.cells
-      next = @cells[jelly.y + cell.y + dy][jelly.x + cell.x + dx]
+    for [x, y] in jelly.cellCoords()
+      next = @cells[y + dy][x + dx]
       return next if next and next != jelly
     return false
 
@@ -136,19 +137,21 @@ class Stage
         if not @checkFilled(jelly, 0, 1)
           @move(jelly, jelly.x, jelly.y + 1)
           moved = true
+    return
 
   checkStuck: () ->
     while jelly = @doOneMerge()
-      for cell in jelly.cells
-        @cells[jelly.y + cell.y][jelly.x + cell.x] = jelly
+      for [x, y] in jelly.cellCoords()
+        @cells[y][x] = jelly
+    return
 
   doOneMerge: () ->
     for jelly in @jellies
-      for cell in jelly.cells
+      for [x, y] in jelly.cellCoords()
         # Only look right and down; left and up are handled by that side
         # itself looking right and down.
         for [dx, dy] in [[1, 0], [0, 1]]
-          other = @cells[jelly.y + cell.y + dy][jelly.x + cell.x + dx]
+          other = @cells[y + dy][x + dx]
           continue unless other and other instanceof Jelly
           continue unless other != jelly
           continue unless jelly.color == other.color
@@ -178,6 +181,9 @@ class Jelly
     @dom.addEventListener 'click', (e) =>
       stage.trySlide(this, -1)
 
+  cellCoords: () ->
+    [@x + cell.x, @y + cell.y] for cell in @cells
+
   slide: (dir, cb) ->
     end = () =>
       @dom.style.webkitAnimation = ''
@@ -194,15 +200,17 @@ class Jelly
     moveToCell @dom, @x, @y
 
   merge: (other) ->
+    # Reposition other's cells as children of this jelly.
     dx = other.x - this.x
     dy = other.y - this.y
-
     for cell in other.cells
       @cells.push cell
       cell.x += dx
       cell.y += dy
       moveToCell cell.dom, cell.x, cell.y
       @dom.appendChild(cell.dom)
+
+    # Delete references from/to other.
     other.cells = null
     other.dom.parentNode.removeChild(other.dom)
 
@@ -218,6 +226,7 @@ class Jelly
           cell.dom.style.borderBottom = 'none'
         else if othercell.x == cell.x and othercell.y == cell.y - 1
           cell.dom.style.borderTop = 'none'
+    return
 
 stage = new Stage(document.getElementById('stage'), levels[0])
 window.stage = stage
