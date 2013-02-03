@@ -162,5 +162,19 @@ class Jelly
     for jelly in @stuck
       jelly.stuck = other.stuck
 
+    # Remove internal borders.
+    for jelly in @stuck
+      for other in @stuck
+        continue if other == jelly
+        console.log(@stuck, jelly, other)
+        if other.x == jelly.x + 1 and other.y == jelly.y
+          jelly.displayDom.style.borderRight = 'none'
+        else if other.x == jelly.x - 1 and other.y == jelly.y
+          jelly.displayDom.style.borderLeft = 'none'
+        else if other.x == jelly.x and other.y == jelly.y + 1
+          jelly.displayDom.style.borderBottom = 'none'
+        else if other.x == jelly.x and other.y == jelly.y - 1
+          jelly.displayDom.style.borderTop = 'none'
+
 stage = new Stage(document.getElementById('stage'), levels[0])
 window.stage = stage
