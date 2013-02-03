@@ -22,7 +22,7 @@ class Stage
   constructor: (@dom, map) ->
     @busy = false
     @jellies = []
-    @cells = @loadMap(map)
+    @loadMap(map)
 
     maybeSwallowEvent = (e) =>
       e.preventDefault()
@@ -34,7 +34,7 @@ class Stage
   loadMap: (map) ->
     table = document.createElement('table')
     @dom.appendChild(table)
-    for y in [0...map.length]
+    @cells = for y in [0...map.length]
       row = map[y].split(//)
       tr = document.createElement('tr')
       table.appendChild(tr)
@@ -58,6 +58,25 @@ class Stage
           @jellies.push jelly
           cell = jelly
         cell
+    @addBorders()
+
+  addBorders: () ->
+    for y in [0...@cells.length]
+      for x in [0...@cells[0].length]
+        cell = @cells[y][x]
+        continue unless cell and cell.tagName == 'TD'
+        border = 'solid 1px #aaa'
+        edges = [
+          ['borderBottom',  0,  1],
+          ['borderTop',     0, -1],
+          ['borderLeft',   -1,  0],
+          ['borderRight',   1,  0],
+        ]
+        for [attr, dx, dy] in edges
+          continue unless 0 <= (y+dy) < @cells.length
+          continue unless 0 <= (x+dx) < @cells[0].length
+          other = @cells[y+dy][x+dx]
+          cell.style[attr] = border unless other and other.tagName == 'TD'
 
   trySlide: (jelly, dir) ->
     return if @cells[jelly.y][jelly.x + dir]
@@ -125,7 +144,7 @@ class Jelly
       @displayDom.removeEventListener 'webkitAnimationEnd', end
       cb()
     @displayDom.addEventListener 'webkitAnimationEnd', end
-    @displayDom.style.webkitAnimation = '300ms ease-out'
+    @displayDom.style.webkitAnimation = '400ms ease-out'
     if dir == 1
       @displayDom.style.webkitAnimationName = 'slideRight'
     else

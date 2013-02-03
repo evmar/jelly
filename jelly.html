@@ -3,7 +3,7 @@
   position: relative;
   user-select: none;
   display: inline-block;
-  border: solid 1px black;
+  border: solid 1px #777;
 }
 #stage table {
   border-spacing: 0;
@@ -14,24 +14,26 @@
   box-sizing: border-box;
 }
 .wall {
-  background: #aaa;
+  background: #ccc;
 }
 .jellybox {
   position: absolute;
 }
 .jelly {
   position: absolute;
-  border: solid 1px black;
   cursor: ew-resize;
 }
 .red {
-  background: #f77;
+  background: hsl(0, 100%, 75%);
+  border: solid 1px hsl(0, 100%, 30%);
 }
 .blue {
-  background: #59f;
+  background: hsl(216, 100%, 70%);
+  border: solid 1px hsl(216, 100%, 30%);
 }
 .green {
-  background: #0e0;
+  background: hsl(120, 100%, 45%);
+  border: solid 1px hsl(120, 100%, 30%);
 }
 
 @-webkit-keyframes slideRight {
