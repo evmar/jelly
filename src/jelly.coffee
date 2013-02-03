@@ -46,6 +46,17 @@ levels = [
     "xxxxx  xx   xx",
     "xxxxxx xx  xxx",
     "xxxxxxxxxxxxxx", ],
+
+  [ "xxxxxxxxxxxxxx",
+    "xxxxxxx      x",
+    "xxxxxxx g    x",
+    "x       xx   x",
+    "x r   b      x",
+    "x x xxx x g  x",
+    "x         x bx",
+    "x       r xxxx",
+    "x   xxxxxxxxxx",
+    "xxxxxxxxxxxxxx", ],
   ]
 
 CELL_SIZE = 48
