@@ -46,18 +46,18 @@ moveToCell = (dom, x, y) ->
 
 class Stage
   constructor: (@dom, map) ->
-    @busy = false
     @jellies = []
     @loadMap(map)
 
+    # Capture and swallow all click events during animations.
+    @busy = false
     maybeSwallowEvent = (e) =>
       e.preventDefault()
       e.stopPropagation() if @busy
-
     for event in ['contextmenu', 'click']
       @dom.addEventListener(event, maybeSwallowEvent, true)
 
-    @checkStuck()
+    @checkForMerges()
 
   loadMap: (map) ->
     table = document.createElement('table')
@@ -89,7 +89,7 @@ class Stage
     @addBorders()
     return
 
-  addBorders: () ->
+  addBorders: ->
     for y in [0...@cells.length]
       for x in [0...@cells[0].length]
         cell = @cells[y][x]
@@ -114,7 +114,7 @@ class Stage
     @move(jelly, jelly.x + dir, jelly.y)
     jelly.slide dir, () =>
       @checkFall()
-      @checkStuck()
+      @checkForMerges()
       @busy = false
 
   move: (jelly, targetX, targetY) ->
@@ -129,7 +129,7 @@ class Stage
       return next if next and next != jelly
     return false
 
-  checkFall: () ->
+  checkFall: ->
     moved = true
     while moved
       moved = false
@@ -139,13 +139,13 @@ class Stage
           moved = true
     return
 
-  checkStuck: () ->
+  checkForMerges: ->
     while jelly = @doOneMerge()
       for [x, y] in jelly.cellCoords()
         @cells[y][x] = jelly
     return
 
-  doOneMerge: () ->
+  doOneMerge: ->
     for jelly in @jellies
       for [x, y] in jelly.cellCoords()
         # Only look right and down; left and up are handled by that side
@@ -181,7 +181,7 @@ class Jelly
     @dom.addEventListener 'click', (e) =>
       stage.trySlide(this, -1)
 
-  cellCoords: () ->
+  cellCoords: ->
     [@x + cell.x, @y + cell.y] for cell in @cells
 
   slide: (dir, cb) ->
