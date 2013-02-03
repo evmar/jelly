@@ -1,6 +1,7 @@
 levels = [
   [ "xxxxxxxxxxxxxx",
     "x            x",
+    "x            x",
     "x      r     x",
     "x      xx    x",
     "x  g     r b x",
@@ -10,9 +11,30 @@ levels = [
   [ "xxxxxxxxxxxxxx",
     "x            x",
     "x            x",
+    "x            x",
     "x     g   g  x",
     "x   r r   r  x",
     "xxxxx x x xxxx",
+    "xxxxxxxxxxxxxx", ],
+
+  [ "xxxxxxxxxxxxxx",
+    "x            x",
+    "x            x",
+    "x   bg  x g  x",
+    "xxx xxxrxxx  x",
+    "x      b     x",
+    "xxx xxxrxxxxxx",
+    "xxxxxxxxxxxxxx", ],
+
+  [ "xxxxxxxxxxxxxx",
+    "x            x",
+    "x       r    x",
+    "x       b    x",
+    "x       x    x",
+    "x b r        x",
+    "x b r      b x",
+    "xxx x      xxx",
+    "xxxxx xxxxxxxx",
     "xxxxxxxxxxxxxx", ],
   ]
 
@@ -196,5 +218,5 @@ class Jelly
         else if othercell.x == cell.x and othercell.y == cell.y - 1
           cell.dom.style.borderTop = 'none'
 
-stage = new Stage(document.getElementById('stage'), levels[0])
+stage = new Stage(document.getElementById('stage'), levels[2])
 window.stage = stage
