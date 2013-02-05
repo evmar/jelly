@@ -75,7 +75,7 @@ class Stage
     maybeSwallowEvent = (e) =>
       e.preventDefault()
       e.stopPropagation() if @busy
-    for event in ['contextmenu', 'click']
+    for event in ['contextmenu', 'click', 'touchstart', 'touchmove']
       @dom.addEventListener(event, maybeSwallowEvent, true)
 
     @checkForMerges()
@@ -203,6 +203,14 @@ class Jelly
       stage.trySlide(this, 1)
     @dom.addEventListener 'click', (e) =>
       stage.trySlide(this, -1)
+
+    @dom.addEventListener 'touchstart', (e) =>
+      @start = e.touches[0].pageX
+    @dom.addEventListener 'touchmove', (e) =>
+      dx = e.touches[0].pageX - @start
+      if Math.abs(dx) > 10
+        dx = Math.max(Math.min(dx, 1), -1)
+        stage.trySlide(this, dx)
 
   cellCoords: ->
     [@x + cell.x, @y + cell.y] for cell in @cells
