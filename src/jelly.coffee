@@ -61,6 +61,11 @@ levels = [
 
 CELL_SIZE = 48
 
+Array::unique = ->
+  output = {}
+  output[@[key]] = @[key] for key in [0...@length]
+  value for key, value of output
+
 moveToCell = (dom, x, y) ->
   dom.style.left = x * CELL_SIZE + 'px'
   dom.style.top = y * CELL_SIZE + 'px'
@@ -131,14 +136,26 @@ class Stage
           cell.style[attr] = border unless other and other.tagName == 'TD'
     return
 
-  trySlide: (jelly, dir) ->
-    return if @checkFilled(jelly, dir, 0)
+  canSlide: (jelly, dir) ->
+    obstacles = @checkFilled(jelly, dir, 0)
+    for obstacle in obstacles
+      return false unless @canSlide(obstacle, dir)
+    return true
+
+  slide: (jelly, dir) ->
+    obstacles = @checkFilled(jelly, dir, 0)
+    for obstacle in obstacles
+      @slide(obstacle, dir)
     @busy = true
     @move(jelly, jelly.x + dir, jelly.y)
     jelly.slide dir, () =>
       @checkFall()
       @checkForMerges()
       @busy = false
+
+  trySlide: (jelly, dir) ->
+    return unless @canSlide(jelly, dir)
+    @slide(jelly, dir)
 
   move: (jelly, targetX, targetY) ->
     @cells[y][x] = null for [x, y] in jelly.cellCoords()
@@ -147,17 +164,19 @@ class Stage
     return
 
   checkFilled: (jelly, dx, dy) ->
+    obstacles = []
     for [x, y] in jelly.cellCoords()
       next = @cells[y + dy][x + dx]
-      return next if next and next != jelly
-    return false
+      if next and next != jelly
+        obstacles.push next
+    return obstacles.unique()
 
   checkFall: ->
     moved = true
     while moved
       moved = false
       for jelly in @jellies
-        if not @checkFilled(jelly, 0, 1)
+        if @checkFilled(jelly, 0, 1).length == 0
           @move(jelly, jelly.x, jelly.y + 1)
           moved = true
     return
