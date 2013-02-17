@@ -163,9 +163,14 @@ class Stage
     return
 
   checkForMerges: ->
+    merged = false
     while jelly = @doOneMerge()
+      merged = true
       for [x, y] in jelly.cellCoords()
         @cells[y][x] = jelly
+    if merged
+      colors = (@jellies.map (jelly) -> jelly.color).unique().length
+      alert("Congratulations! Level completed.") if colors == @jellies.length
     return
 
   doOneMerge: ->
