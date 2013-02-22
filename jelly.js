@@ -299,16 +299,11 @@
         _this = this;
       end = function() {
         _this.dom.style.webkitAnimation = '';
-        _this.dom.removeEventListener('webkitAnimationEnd', end);
+        _this.dom.removeEventListener('webkitTransitionEnd', end);
         return cb();
       };
-      this.dom.addEventListener('webkitAnimationEnd', end);
-      this.dom.style.webkitAnimation = '300ms ease-out';
-      if (dir === 1) {
-        return this.dom.style.webkitAnimationName = 'slideRight';
-      } else {
-        return this.dom.style.webkitAnimationName = 'slideLeft';
-      }
+      this.dom.addEventListener('webkitTransitionEnd', end);
+      return this.dom.style.webkitAnimation = '300ms ease-out';
     };
 
     Jelly.prototype.updatePosition = function(x, y) {

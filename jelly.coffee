@@ -228,14 +228,10 @@ class Jelly
   slide: (dir, cb) ->
     end = () =>
       @dom.style.webkitAnimation = ''
-      @dom.removeEventListener 'webkitAnimationEnd', end
+      @dom.removeEventListener 'webkitTransitionEnd', end
       cb()
-    @dom.addEventListener 'webkitAnimationEnd', end
+    @dom.addEventListener 'webkitTransitionEnd', end
     @dom.style.webkitAnimation = '300ms ease-out'
-    if dir == 1
-      @dom.style.webkitAnimationName = 'slideRight'
-    else
-      @dom.style.webkitAnimationName = 'slideLeft'
 
   updatePosition: (@x, @y) ->
     moveToCell @dom, @x, @y
