@@ -144,8 +144,7 @@ class Stage
 
   slide: (jelly, dir) ->
     obstacles = @checkFilled(jelly, dir, 0)
-    for obstacle in obstacles
-      @slide(obstacle, dir)
+    @slide(obstacle, dir) for obstacle in obstacles
     @busy = true
     @move(jelly, jelly.x + dir, jelly.y)
     jelly.slide dir, () =>
