@@ -172,7 +172,7 @@
     };
 
     Stage.prototype.checkForMerges = function() {
-      var colors, jelly, merged, x, y, _i, _len, _ref, _ref1;
+      var jelly, merged, x, y, _i, _len, _ref, _ref1;
       merged = false;
       while (jelly = this.doOneMerge()) {
         merged = true;
@@ -183,12 +183,20 @@
         }
       }
       if (merged) {
-        colors = (this.jellies.map(function(jelly) {
-          return jelly.color;
-        })).unique().length;
-        if (colors === this.jellies.length) {
-          alert("Congratulations! Level completed.");
-        }
+        this.checkForCompletion();
+      }
+    };
+
+    Stage.prototype.checkForCompletion = function() {
+      var colors, j, _i, _len, _ref;
+      colors = {};
+      _ref = this.jellies;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        j = _ref[_i];
+        colors[j.color] = 1;
+      }
+      if (Object.keys(colors).length === this.jellies.length) {
+        alert("Congratulations! Level completed.");
       }
     };
 

@@ -168,9 +168,14 @@ class Stage
       merged = true
       for [x, y] in jelly.cellCoords()
         @cells[y][x] = jelly
-    if merged
-      colors = (@jellies.map (jelly) -> jelly.color).unique().length
-      alert("Congratulations! Level completed.") if colors == @jellies.length
+    @checkForCompletion() if merged
+    return
+
+  checkForCompletion: ->
+    colors = {}
+    colors[j.color] = 1 for j in @jellies
+    if Object.keys(colors).length == @jellies.length
+      alert("Congratulations! Level completed.")
     return
 
   doOneMerge: ->
