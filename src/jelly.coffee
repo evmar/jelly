@@ -270,15 +270,22 @@ class Jelly
           cell.dom.style.borderTop = 'none'
     return
 
-level = parseInt(location.search.substr(1), 10) or 0
-stage = new Stage(document.getElementById('map'), levels[level])
-window.stage = stage
+run = ->
+  level = parseInt(location.search.substr(1), 10) or 0
+  stage = new Stage(document.getElementById('map'), levels[level])
+  window.stage = stage
 
-levelPicker = document.getElementById('level')
-levelPicker.value = level
-levelPicker.addEventListener 'change', () ->
-  location.search = '?' + levelPicker.value
+  levelPicker = document.getElementById('level')
+  levelPicker.value = level
+  levelPicker.addEventListener 'change', () ->
+    location.search = '?' + levelPicker.value
 
-document.getElementById('reset').addEventListener 'click', ->
-  stage.dom.innerHTML = ''
-  stage = new Stage(stage.dom, levels[level])
+  document.getElementById('reset').addEventListener 'click', ->
+    stage.dom.innerHTML = ''
+    stage = new Stage(stage.dom, levels[level])
+
+global = exports ? this
+global.run = run
+global.Stage = Stage
+global.Jelly = Jelly
+

@@ -1,19 +1,19 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>jelly no puzzle in html5</title>
+<title>jelly no puzzle tests</title>
 <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
 <style>
 body {
   line-height: 1.6em;
-  max-width: 674px;
+  max-width: 1000px;
   margin: 4ex;
   font-family: 'Open Sans', sans-serif;
 }
 h1 {
   font-weight: normal;
 }
-#stage {
+.stage {
   position: relative;
   user-select: none;
   display: inline-block;
@@ -31,14 +31,14 @@ select#level {
   right: 8px;
   font: inherit;
 }
-#stage table {
+.stage table {
   border-spacing: 0;
   background: #ccc;
   background-size: 36px 36px;
   background-image: -webkit-linear-gradient(-45deg,
     #ccc 25%, #bbb 25%, #bbb 50%, #ccc 50%, #ccc 75%, #bbb 75%);
 }
-#stage table td {
+.stage table td {
   padding: 0;
 }
 .cell {
@@ -101,45 +101,30 @@ select#level {
     -webkit-transform: none;
   }
 }
+
+#tests {
+  display: none;
+}
+
+#results .failure {
+    background-color: red;
+}
+
+#results .stage {
+   margin : 5px;
+}
+
 </style>
 </head>
 <body>
-<h1>jelly</h1>
+<h1>Tests</h1>
 
-<p>This is a (WebKit-only*) HTML5 clone
-of <a href='http://qrostar.skr.jp/index.cgi?page=jelly&lang=en'>Jelly
-no Puzzle</a>, an excellent puzzle game that was released for Windows
-only.  The game design and levels are taken directly from that. If you
-can run the Windows version I highly recommend it as it has a lot of
-great extra details.</p>
+<div id="results"></div>
 
-<div id='stage'>
-<div id='map'></div>
-<select id='level'>
-  <option value='0'>Level 1</option>
-  <option value='1'>Level 2</option>
-  <option value='2'>Level 3</option>
-  <option value='3'>Level 4</option>
-  <option value='4'>Level 5</option>
-  <option value='5'>Level 6</option>
-</select>
-<button id='reset'>Reset</button>
-</div>
+<div id="tests" class="stage"></div>
 
-<p>How to play: left and right mouse button moves jellies left and
-  right.  When jellies of the same color touch they merge.
-  Your objective is to unify all jellies of the same color.</p>
 
-<p><a href='https://github.com/martine/jelly'>Here's the source</a>.
-  To be implemented:
-  <ol>
-    <li>A "you win" screen when you win.</li>
-</ol></p>
-
-<p><small>* It is WebKit-only because CSS prefixes are dumb and I
-  don't have the patience to test on other browsers.</small></p>
-
-<script src='jelly.js'></script>
-<script>run()</script>
+<script src='../src/jelly.js'></script>
+<script src='jellyTest.js'></script>
 </body>
 </html>
