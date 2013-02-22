@@ -114,13 +114,21 @@
     };
 
     Stage.prototype.waitForAnimation = function(cb) {
-      var end,
+      var end, name, names, _i, _len,
         _this = this;
+      names = ['transitionend', 'webkitTransitionEnd'];
       end = function() {
-        _this.dom.removeEventListener('webkitTransitionEnd', end);
+        var name, _i, _len;
+        for (_i = 0, _len = names.length; _i < _len; _i++) {
+          name = names[_i];
+          _this.dom.removeEventListener(name, end);
+        }
         return cb();
       };
-      return this.dom.addEventListener('webkitTransitionEnd', end);
+      for (_i = 0, _len = names.length; _i < _len; _i++) {
+        name = names[_i];
+        this.dom.addEventListener(name, end);
+      }
     };
 
     Stage.prototype.trySlide = function(jelly, dir) {

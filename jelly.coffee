@@ -132,10 +132,12 @@ class Stage
     return
 
   waitForAnimation: (cb) ->
+    names = ['transitionend', 'webkitTransitionEnd']
     end = () =>
-      @dom.removeEventListener 'webkitTransitionEnd', end
+      @dom.removeEventListener(name, end) for name in names
       cb()
-    @dom.addEventListener 'webkitTransitionEnd', end
+    @dom.addEventListener(name, end) for name in names
+    return
 
   trySlide: (jelly, dir) ->
     return if @checkFilled(jelly, dir, 0)
