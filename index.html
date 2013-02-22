@@ -2,12 +2,12 @@
 <html>
 <head>
 <title>jelly no puzzle in html5</title>
+<meta charset=utf-8>
 <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
 <style>
 body {
-  line-height: 1.6em;
   max-width: 674px;
-  margin: 4ex;
+  margin: 4ex auto;
   font-family: 'Open Sans', sans-serif;
 }
 h1 {
@@ -37,6 +37,8 @@ select#level {
   background-size: 36px 36px;
   background-image: -webkit-linear-gradient(-45deg,
     #ccc 25%, #bbb 25%, #bbb 50%, #ccc 50%, #ccc 75%, #bbb 75%);
+  background-image: linear-gradient(-45deg,
+    #ccc 25%, #bbb 25%, #bbb 50%, #ccc 50%, #ccc 75%, #bbb 75%);
 }
 #stage table td {
   padding: 0;
@@ -44,6 +46,7 @@ select#level {
 .cell {
   width: 48px;
   height: 48px;
+  -moz-box-sizing: border-box;
   box-sizing: border-box;
 }
 .transparent {
@@ -53,8 +56,16 @@ select#level {
 }
 .jellybox {
   position: absolute;
-  -webkit-transition-property: left;
-  -webkit-transition-duration: 200ms;
+  -webkit-transition:
+    /* sliding animation. */
+    left 200ms,
+    /* falling animation: roughly x^2. */
+    top 200ms cubic-bezier(0.5,0, 1,0.5);
+  transition:
+    /* sliding animation. */
+    left 200ms,
+    /* falling animation: roughly x^2. */
+    top 200ms cubic-bezier(0.5,0, 1,0.5);
 }
 .jelly {
   position: absolute;
@@ -72,41 +83,12 @@ select#level {
   background: hsl(120, 100%, 45%);
   border: solid 1px hsl(120, 100%, 30%);
 }
-
-@-webkit-keyframes slideRight {
-  0% {
-    -webkit-transform: none;
-  }
-  50% {
-    -webkit-transform: skew(-10deg, 0);
-  }
-  60% {
-    -webkit-transform: skew(5deg, 0);
-  }
-  100% {
-    -webkit-transform: none;
-  }
-}
-@-webkit-keyframes slideLeft {
-  0% {
-    -webkit-transform: none;
-  }
-  50% {
-    -webkit-transform: skew(10deg, 0);
-  }
-  60% {
-    -webkit-transform: skew(-5deg, 0);
-  }
-  100% {
-    -webkit-transform: none;
-  }
-}
 </style>
 </head>
 <body>
 <h1>jelly</h1>
 
-<p>This is a (WebKit-only*) HTML5 clone
+<p>This is an HTML5 clone
 of <a href='http://qrostar.skr.jp/index.cgi?page=jelly&lang=en'>Jelly
 no Puzzle</a>, an excellent puzzle game that was released for Windows
 only.  The game design and levels are taken directly from that. If you
@@ -133,11 +115,8 @@ great extra details.</p>
 <p><a href='https://github.com/martine/jelly'>Here's the source</a>.
   To be implemented:
   <ol>
-    <li>A "you win" screen when you win.</li>
+    <li>Beautiful "you win" screen when you win.</li>
 </ol></p>
-
-<p><small>* It is WebKit-only because CSS prefixes are dumb and I
-  don't have the patience to test on other browsers.</small></p>
 
 <script src='jelly.js'></script>
 <script>run()</script>

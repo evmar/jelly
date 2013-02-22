@@ -80,7 +80,7 @@ class Stage
     maybeSwallowEvent = (e) =>
       e.preventDefault()
       e.stopPropagation() if @busy
-    for event in ['contextmenu', 'click']
+    for event in ['contextmenu', 'click', 'touchstart', 'touchmove']
       @dom.addEventListener(event, maybeSwallowEvent, true)
 
     @checkForMerges()
@@ -147,10 +147,22 @@ class Stage
     @slide(obstacle, dir) for obstacle in obstacles
     @busy = true
     @move(jelly, jelly.x + dir, jelly.y)
-    jelly.slide dir, () =>
-      @checkFall()
-      @checkForMerges()
-      @busy = false
+    @waitForAnimation () =>
+      @checkFall =>
+        @checkForMerges()
+        @busy = false
+
+  waitForAnimation: (cb) ->
+    names = ['transitionend', 'webkitTransitionEnd']
+    end = () =>
+      @dom.removeEventListener(name, end) for name in names
+      cb()
+    @dom.addEventListener(name, end) for name in names
+    return
+
+  trySlide: (jelly, dir) ->
+    return unless @canSlide(jelly, dir)
+    @slide(jelly, dir)
 
   trySlide: (jelly, dir) ->
     return unless @canSlide(jelly, dir)
@@ -170,21 +182,40 @@ class Stage
         obstacles.push next
     return obstacles.unique()
 
-  checkFall: ->
-    moved = true
-    while moved
-      moved = false
+  checkFall: (cb) ->
+    moved = false
+    didOneMove = true
+    while didOneMove
+      didOneMove = false
       for jelly in @jellies
         if @checkFilled(jelly, 0, 1).length == 0
           @move(jelly, jelly.x, jelly.y + 1)
+          didOneMove = true
           moved = true
+    if moved
+      @waitForAnimation cb
+    else
+      cb()
     return
 
   checkForMerges: ->
+    merged = false
     while jelly = @doOneMerge()
+      merged = true
       for [x, y] in jelly.cellCoords()
         @cells[y][x] = jelly
+    @checkForCompletion() if merged
     return
+
+  checkForCompletion: ->
+    colors = {}
+    colors[j.color] = 1 for j in @jellies
+    if Object.keys(colors).length == @jellies.length
+      @showCongrats()
+    return
+
+  showCongrats: ->
+      alert("Congratulations! Level completed.")
 
   doOneMerge: ->
     for jelly in @jellies
@@ -222,20 +253,16 @@ class Jelly
     @dom.addEventListener 'click', (e) =>
       stage.trySlide(this, -1)
 
+    @dom.addEventListener 'touchstart', (e) =>
+      @start = e.touches[0].pageX
+    @dom.addEventListener 'touchmove', (e) =>
+      dx = e.touches[0].pageX - @start
+      if Math.abs(dx) > 10
+        dx = Math.max(Math.min(dx, 1), -1)
+        stage.trySlide(this, dx)
+
   cellCoords: ->
     [@x + cell.x, @y + cell.y] for cell in @cells
-
-  slide: (dir, cb) ->
-    end = () =>
-      @dom.style.webkitAnimation = ''
-      @dom.removeEventListener 'webkitAnimationEnd', end
-      cb()
-    @dom.addEventListener 'webkitAnimationEnd', end
-    @dom.style.webkitAnimation = '300ms ease-out'
-    if dir == 1
-      @dom.style.webkitAnimationName = 'slideRight'
-    else
-      @dom.style.webkitAnimationName = 'slideLeft'
 
   updatePosition: (@x, @y) ->
     moveToCell @dom, @x, @y
