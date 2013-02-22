@@ -61,6 +61,11 @@ levels = [
 
 CELL_SIZE = 48
 
+Array::unique = ->
+  output = {}
+  output[@[key]] = @[key] for key in [0...@length]
+  value for key, value of output
+
 moveToCell = (dom, x, y) ->
   dom.style.left = x * CELL_SIZE + 'px'
   dom.style.top = y * CELL_SIZE + 'px'
@@ -131,6 +136,22 @@ class Stage
           cell.style[attr] = border unless other and other.tagName == 'TD'
     return
 
+  canSlide: (jelly, dir) ->
+    obstacles = @checkFilled(jelly, dir, 0)
+    for obstacle in obstacles
+      return false unless @canSlide(obstacle, dir)
+    return true
+
+  slide: (jelly, dir) ->
+    obstacles = @checkFilled(jelly, dir, 0)
+    @slide(obstacle, dir) for obstacle in obstacles
+    @busy = true
+    @move(jelly, jelly.x + dir, jelly.y)
+    @waitForAnimation () =>
+      @checkFall =>
+        @checkForMerges()
+        @busy = false
+
   waitForAnimation: (cb) ->
     names = ['transitionend', 'webkitTransitionEnd']
     end = () =>
@@ -140,13 +161,12 @@ class Stage
     return
 
   trySlide: (jelly, dir) ->
-    return if @checkFilled(jelly, dir, 0)
-    @busy = true
-    @move(jelly, jelly.x + dir, jelly.y)
-    @waitForAnimation () =>
-      @checkFall =>
-        @checkForMerges()
-        @busy = false
+    return unless @canSlide(jelly, dir)
+    @slide(jelly, dir)
+
+  trySlide: (jelly, dir) ->
+    return unless @canSlide(jelly, dir)
+    @slide(jelly, dir)
 
   move: (jelly, targetX, targetY) ->
     @cells[y][x] = null for [x, y] in jelly.cellCoords()
@@ -155,10 +175,12 @@ class Stage
     return
 
   checkFilled: (jelly, dx, dy) ->
+    obstacles = []
     for [x, y] in jelly.cellCoords()
       next = @cells[y + dy][x + dx]
-      return next if next and next != jelly
-    return false
+      if next and next != jelly
+        obstacles.push next
+    return obstacles.unique()
 
   checkFall: (cb) ->
     moved = false
@@ -166,7 +188,7 @@ class Stage
     while didOneMove
       didOneMove = false
       for jelly in @jellies
-        if not @checkFilled(jelly, 0, 1)
+        if @checkFilled(jelly, 0, 1).length == 0
           @move(jelly, jelly.x, jelly.y + 1)
           didOneMove = true
           moved = true
@@ -189,8 +211,11 @@ class Stage
     colors = {}
     colors[j.color] = 1 for j in @jellies
     if Object.keys(colors).length == @jellies.length
-      alert("Congratulations! Level completed.")
+      @showCongrats()
     return
+
+  showCongrats: ->
+      alert("Congratulations! Level completed.")
 
   doOneMerge: ->
     for jelly in @jellies
@@ -271,15 +296,22 @@ class Jelly
           cell.dom.style.borderTop = 'none'
     return
 
-level = parseInt(location.search.substr(1), 10) or 0
-stage = new Stage(document.getElementById('map'), levels[level])
-window.stage = stage
+run = ->
+  level = parseInt(location.search.substr(1), 10) or 0
+  stage = new Stage(document.getElementById('map'), levels[level])
+  window.stage = stage
 
-levelPicker = document.getElementById('level')
-levelPicker.value = level
-levelPicker.addEventListener 'change', () ->
-  location.search = '?' + levelPicker.value
+  levelPicker = document.getElementById('level')
+  levelPicker.value = level
+  levelPicker.addEventListener 'change', () ->
+    location.search = '?' + levelPicker.value
 
-document.getElementById('reset').addEventListener 'click', ->
-  stage.dom.innerHTML = ''
-  stage = new Stage(stage.dom, levels[level])
+  document.getElementById('reset').addEventListener 'click', ->
+    stage.dom.innerHTML = ''
+    stage = new Stage(stage.dom, levels[level])
+
+global = exports ? this
+global.run = run
+global.Stage = Stage
+global.Jelly = Jelly
+

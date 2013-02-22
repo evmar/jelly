@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>jelly no puzzle tests</title>
+<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+<style>
+body {
+  line-height: 1.6em;
+  max-width: 1000px;
+  margin: 4ex;
+  font-family: 'Open Sans', sans-serif;
+}
+h1 {
+  font-weight: normal;
+}
+.stage {
+  position: relative;
+  user-select: none;
+  display: inline-block;
+  border: solid 1px #777;
+}
+select#level {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font: inherit;
+}
+#reset {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  font: inherit;
+}
+.stage table {
+  border-spacing: 0;
+  background: #ccc;
+  background-size: 36px 36px;
+  background-image: -webkit-linear-gradient(-45deg,
+    #ccc 25%, #bbb 25%, #bbb 50%, #ccc 50%, #ccc 75%, #bbb 75%);
+}
+.stage table td {
+  padding: 0;
+}
+.cell {
+  width: 48px;
+  height: 48px;
+  box-sizing: border-box;
+}
+.transparent {
+  background: #eef7ff;
+}
+.wall {
+}
+.jellybox {
+  position: absolute;
+  -webkit-transition-property: left;
+  -webkit-transition-duration: 200ms;
+}
+.jelly {
+  position: absolute;
+  cursor: ew-resize;
+}
+.red {
+  background: hsl(0, 100%, 75%);
+  border: solid 1px hsl(0, 100%, 30%);
+}
+.blue {
+  background: hsl(216, 100%, 70%);
+  border: solid 1px hsl(216, 100%, 30%);
+}
+.green {
+  background: hsl(120, 100%, 45%);
+  border: solid 1px hsl(120, 100%, 30%);
+}
+
+@-webkit-keyframes slideRight {
+  0% {
+    -webkit-transform: none;
+  }
+  50% {
+    -webkit-transform: skew(-10deg, 0);
+  }
+  60% {
+    -webkit-transform: skew(5deg, 0);
+  }
+  100% {
+    -webkit-transform: none;
+  }
+}
+@-webkit-keyframes slideLeft {
+  0% {
+    -webkit-transform: none;
+  }
+  50% {
+    -webkit-transform: skew(10deg, 0);
+  }
+  60% {
+    -webkit-transform: skew(-5deg, 0);
+  }
+  100% {
+    -webkit-transform: none;
+  }
+}
+
+#tests {
+  display: none;
+}
+
+#results .failure {
+    background-color: red;
+}
+
+#results .stage {
+   margin : 5px;
+}
+
+</style>
+</head>
+<body>
+<h1>Tests</h1>
+
+<div id="results"></div>
+
+<div id="tests" class="stage"></div>
+
+
+<script src='../jelly.js'></script>
+<script src='jellyTest.js'></script>
+</body>
+</html>
