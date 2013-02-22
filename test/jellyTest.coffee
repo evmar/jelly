@@ -57,6 +57,20 @@ tests = [
     "xrg x",
     "xxxxx", ]
  ,
+  name: "move left a tower pushing tower of several jellies"
+  action:
+    move: left
+    row: 1
+    col: 3
+  input: [ "xxxxx",
+    "x bgx",
+    "x rgx",
+    "xxxxx", ]
+  result: [ "xxxxx",
+    "xbg x",
+    "xrg x",
+    "xxxxx", ]
+ ,
 ]
 
 runTest = (test) ->
