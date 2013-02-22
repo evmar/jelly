@@ -53,8 +53,11 @@ select#level {
 }
 .jellybox {
   position: absolute;
-  -webkit-transition-property: left;
-  -webkit-transition-duration: 200ms;
+  -webkit-transition:
+    /* sliding animation. */
+    left 200ms,
+    /* falling animation: roughly x^2. */
+    top 200ms cubic-bezier(0.5,0, 1,0.5);
 }
 .jelly {
   position: absolute;

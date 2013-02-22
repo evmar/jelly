@@ -131,14 +131,20 @@ class Stage
           cell.style[attr] = border unless other and other.tagName == 'TD'
     return
 
+  waitForAnimation: (cb) ->
+    end = () =>
+      @dom.removeEventListener 'webkitTransitionEnd', end
+      cb()
+    @dom.addEventListener 'webkitTransitionEnd', end
+
   trySlide: (jelly, dir) ->
     return if @checkFilled(jelly, dir, 0)
     @busy = true
     @move(jelly, jelly.x + dir, jelly.y)
-    jelly.slide dir, () =>
-      @checkFall()
-      @checkForMerges()
-      @busy = false
+    @waitForAnimation () =>
+      @checkFall =>
+        @checkForMerges()
+        @busy = false
 
   move: (jelly, targetX, targetY) ->
     @cells[y][x] = null for [x, y] in jelly.cellCoords()
@@ -152,14 +158,20 @@ class Stage
       return next if next and next != jelly
     return false
 
-  checkFall: ->
-    moved = true
-    while moved
-      moved = false
+  checkFall: (cb) ->
+    moved = false
+    didOneMove = true
+    while didOneMove
+      didOneMove = false
       for jelly in @jellies
         if not @checkFilled(jelly, 0, 1)
           @move(jelly, jelly.x, jelly.y + 1)
+          didOneMove = true
           moved = true
+    if moved
+      @waitForAnimation cb
+    else
+      cb()
     return
 
   checkForMerges: ->
@@ -224,14 +236,6 @@ class Jelly
 
   cellCoords: ->
     [@x + cell.x, @y + cell.y] for cell in @cells
-
-  slide: (dir, cb) ->
-    end = () =>
-      @dom.style.webkitAnimation = ''
-      @dom.removeEventListener 'webkitTransitionEnd', end
-      cb()
-    @dom.addEventListener 'webkitTransitionEnd', end
-    @dom.style.webkitAnimation = '300ms ease-out'
 
   updatePosition: (@x, @y) ->
     moveToCell @dom, @x, @y

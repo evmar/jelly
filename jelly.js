@@ -113,6 +113,16 @@
       }
     };
 
+    Stage.prototype.waitForAnimation = function(cb) {
+      var end,
+        _this = this;
+      end = function() {
+        _this.dom.removeEventListener('webkitTransitionEnd', end);
+        return cb();
+      };
+      return this.dom.addEventListener('webkitTransitionEnd', end);
+    };
+
     Stage.prototype.trySlide = function(jelly, dir) {
       var _this = this;
       if (this.checkFilled(jelly, dir, 0)) {
@@ -120,10 +130,11 @@
       }
       this.busy = true;
       this.move(jelly, jelly.x + dir, jelly.y);
-      return jelly.slide(dir, function() {
-        _this.checkFall();
-        _this.checkForMerges();
-        return _this.busy = false;
+      return this.waitForAnimation(function() {
+        return _this.checkFall(function() {
+          _this.checkForMerges();
+          return _this.busy = false;
+        });
       });
     };
 
@@ -155,19 +166,26 @@
       return false;
     };
 
-    Stage.prototype.checkFall = function() {
-      var jelly, moved, _i, _len, _ref;
-      moved = true;
-      while (moved) {
-        moved = false;
+    Stage.prototype.checkFall = function(cb) {
+      var didOneMove, jelly, moved, _i, _len, _ref;
+      moved = false;
+      didOneMove = true;
+      while (didOneMove) {
+        didOneMove = false;
         _ref = this.jellies;
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           jelly = _ref[_i];
           if (!this.checkFilled(jelly, 0, 1)) {
             this.move(jelly, jelly.x, jelly.y + 1);
+            didOneMove = true;
             moved = true;
           }
         }
+      }
+      if (moved) {
+        this.waitForAnimation(cb);
+      } else {
+        cb();
       }
     };
 
@@ -292,18 +310,6 @@
         _results.push([this.x + cell.x, this.y + cell.y]);
       }
       return _results;
-    };
-
-    Jelly.prototype.slide = function(dir, cb) {
-      var end,
-        _this = this;
-      end = function() {
-        _this.dom.style.webkitAnimation = '';
-        _this.dom.removeEventListener('webkitTransitionEnd', end);
-        return cb();
-      };
-      this.dom.addEventListener('webkitTransitionEnd', end);
-      return this.dom.style.webkitAnimation = '300ms ease-out';
     };
 
     Jelly.prototype.updatePosition = function(x, y) {
