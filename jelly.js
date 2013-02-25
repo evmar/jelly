@@ -124,7 +124,7 @@
           name = names[_i];
           _this.dom.removeEventListener(name, end);
         }
-        return cb();
+        return setTimeout(cb, 0);
       };
       for (_i = 0, _len = names.length; _i < _len; _i++) {
         name = names[_i];
