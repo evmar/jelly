@@ -34,7 +34,8 @@
     }
 
     Stage.prototype.loadMap = function(map) {
-      var cell, color, jelly, row, table, td, tr, x, y;
+      var cell, color, jelly, nextId, row, table, td, tr, x, y;
+      nextId = 0;
       table = document.createElement('table');
       this.dom.appendChild(table);
       this.cells = (function() {
@@ -71,7 +72,8 @@
                 tr.appendChild(td);
               }
               if (color) {
-                jelly = new Jelly(this, x, y, color);
+                jelly = new Jelly(this, nextId, x, y, color);
+                nextId += 1;
                 this.dom.appendChild(jelly.dom);
                 this.jellies.push(jelly);
                 cell = jelly;
@@ -117,7 +119,7 @@
       var end, name, names, _i, _len,
         _this = this;
       names = ['transitionend', 'webkitTransitionEnd'];
-      end = function() {
+      end = function(e) {
         var name, _i, _len;
         for (_i = 0, _len = names.length; _i < _len; _i++) {
           name = names[_i];
@@ -131,14 +133,42 @@
       }
     };
 
+    Stage.prototype.gatherSliders = function(jelly, dir, jellies) {
+      var adj, adjacent, _i, _len;
+      if (jelly.id in jellies) {
+        return jellies;
+      }
+      adjacent = this.getAdjacent(jelly, dir, 0);
+      if (!adjacent) {
+        return null;
+      }
+      jellies[jelly.id] = jelly;
+      for (_i = 0, _len = adjacent.length; _i < _len; _i++) {
+        adj = adjacent[_i];
+        if (!this.gatherSliders(adj, dir, jellies)) {
+          return null;
+        }
+      }
+      return jellies;
+    };
+
     Stage.prototype.trySlide = function(jelly, dir) {
-      var _this = this;
-      if (this.checkFilled(jelly, dir, 0)) {
+      var group, id,
+        _this = this;
+      group = this.gatherSliders(jelly, dir, {});
+      if (!group) {
         return;
       }
       this.busy = true;
-      this.move(jelly, jelly.x + dir, jelly.y);
-      return this.waitForAnimation(function() {
+      this.move((function() {
+        var _results;
+        _results = [];
+        for (id in group) {
+          _results.push(group[id]);
+        }
+        return _results;
+      })(), dir, 0);
+      this.waitForAnimation(function() {
         return _this.checkFall(function() {
           _this.checkForMerges();
           return _this.busy = false;
@@ -146,36 +176,58 @@
       });
     };
 
-    Stage.prototype.move = function(jelly, targetX, targetY) {
-      var x, y, _i, _j, _len, _len1, _ref, _ref1, _ref2, _ref3;
-      _ref = jelly.cellCoords();
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        _ref1 = _ref[_i], x = _ref1[0], y = _ref1[1];
-        this.cells[y][x] = null;
+    Stage.prototype.move = function(jellies, dx, dy) {
+      var jelly, x, y, _i, _j, _k, _l, _len, _len1, _len2, _len3, _len4, _m, _ref, _ref1, _ref2, _ref3;
+      for (_i = 0, _len = jellies.length; _i < _len; _i++) {
+        jelly = jellies[_i];
+        _ref = jelly.cellCoords();
+        for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
+          _ref1 = _ref[_j], x = _ref1[0], y = _ref1[1];
+          this.cells[y][x] = null;
+        }
       }
-      jelly.updatePosition(targetX, targetY);
-      _ref2 = jelly.cellCoords();
-      for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
-        _ref3 = _ref2[_j], x = _ref3[0], y = _ref3[1];
-        this.cells[y][x] = jelly;
+      for (_k = 0, _len2 = jellies.length; _k < _len2; _k++) {
+        jelly = jellies[_k];
+        jelly.updatePosition(jelly.x + dx, jelly.y + dy);
+      }
+      for (_l = 0, _len3 = jellies.length; _l < _len3; _l++) {
+        jelly = jellies[_l];
+        _ref2 = jelly.cellCoords();
+        for (_m = 0, _len4 = _ref2.length; _m < _len4; _m++) {
+          _ref3 = _ref2[_m], x = _ref3[0], y = _ref3[1];
+          this.cells[y][x] = jelly;
+        }
       }
     };
 
-    Stage.prototype.checkFilled = function(jelly, dx, dy) {
-      var next, x, y, _i, _len, _ref, _ref1;
+    Stage.prototype.getAdjacent = function(jelly, dx, dy) {
+      var id, ids, jellies, next, x, y, _i, _len, _ref, _ref1;
+      jellies = {};
       _ref = jelly.cellCoords();
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         _ref1 = _ref[_i], x = _ref1[0], y = _ref1[1];
         next = this.cells[y + dy][x + dx];
         if (next && next !== jelly) {
-          return next;
+          if (!(next instanceof Jelly)) {
+            return null;
+          }
+          jellies[next.id] = next;
         }
       }
-      return false;
+      ids = Object.keys(jellies);
+      return (function() {
+        var _j, _len1, _results;
+        _results = [];
+        for (_j = 0, _len1 = ids.length; _j < _len1; _j++) {
+          id = ids[_j];
+          _results.push(jellies[id]);
+        }
+        return _results;
+      })();
     };
 
     Stage.prototype.checkFall = function(cb) {
-      var didOneMove, jelly, moved, _i, _len, _ref;
+      var adjacent, didOneMove, jelly, moved, _i, _len, _ref;
       moved = false;
       didOneMove = true;
       while (didOneMove) {
@@ -183,8 +235,9 @@
         _ref = this.jellies;
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           jelly = _ref[_i];
-          if (!this.checkFilled(jelly, 0, 1)) {
-            this.move(jelly, jelly.x, jelly.y + 1);
+          adjacent = this.getAdjacent(jelly, 0, 1);
+          if ((adjacent != null) && adjacent.length === 0) {
+            this.move([jelly], 0, 1);
             didOneMove = true;
             moved = true;
           }
@@ -249,7 +302,7 @@
             }
             jelly.merge(other);
             this.jellies = this.jellies.filter(function(j) {
-              return j !== other;
+              return j.id !== other.id;
             });
             return jelly;
           }
@@ -278,9 +331,10 @@
 
   Jelly = (function() {
 
-    function Jelly(stage, x, y, color) {
+    function Jelly(stage, id, x, y, color) {
       var cell,
         _this = this;
+      this.id = id;
       this.x = x;
       this.y = y;
       this.color = color;

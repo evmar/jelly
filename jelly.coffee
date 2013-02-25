@@ -81,6 +81,7 @@ class Stage
     @checkForMerges()
 
   loadMap: (map) ->
+    nextId = 0
     table = document.createElement('table')
     @dom.appendChild(table)
     @cells = for y in [0...map.length]
@@ -104,7 +105,8 @@ class Stage
           td.className = 'transparent'
           tr.appendChild(td)
         if color
-          jelly = new Jelly(this, x, y, color)
+          jelly = new Jelly(this, nextId, x, y, color)
+          nextId += 1
           @dom.appendChild(jelly.dom)
           @jellies.push jelly
           cell = jelly
@@ -133,32 +135,57 @@ class Stage
 
   waitForAnimation: (cb) ->
     names = ['transitionend', 'webkitTransitionEnd']
-    end = () =>
+    end = (e) =>
       @dom.removeEventListener(name, end) for name in names
       cb()
     @dom.addEventListener(name, end) for name in names
     return
 
+  # Gather a group of jellies that will slide together.
+  # jelly is the jelly to examine for neighbors; dir is the direction
+  # to slide.  jellies is an object used in tracking state.
+  # Returns a set of jellies keyed by id or null if there's a wall in the way.
+  gatherSliders: (jelly, dir, jellies) ->
+    return jellies if jelly.id of jellies
+    adjacent = @getAdjacent(jelly, dir, 0)
+    return null unless adjacent  # wall
+
+    # Add this jelly to the set, examine others.
+    jellies[jelly.id] = jelly
+    for adj in adjacent
+      return null if not @gatherSliders(adj, dir, jellies)
+    return jellies
+
   trySlide: (jelly, dir) ->
-    return if @checkFilled(jelly, dir, 0)
+    group = @gatherSliders(jelly, dir, {})
+    return unless group
+
     @busy = true
-    @move(jelly, jelly.x + dir, jelly.y)
+    @move(group[id] for id of group, dir, 0)
     @waitForAnimation () =>
       @checkFall =>
         @checkForMerges()
         @busy = false
-
-  move: (jelly, targetX, targetY) ->
-    @cells[y][x] = null for [x, y] in jelly.cellCoords()
-    jelly.updatePosition(targetX, targetY)
-    @cells[y][x] = jelly for [x, y] in jelly.cellCoords()
     return
 
-  checkFilled: (jelly, dx, dy) ->
+  move: (jellies, dx, dy) ->
+    @cells[y][x] = null for [x, y] in jelly.cellCoords() for jelly in jellies
+    jelly.updatePosition(jelly.x+dx, jelly.y+dy) for jelly in jellies
+    @cells[y][x] = jelly for [x, y] in jelly.cellCoords() for jelly in jellies
+    return
+
+  # See if there's space for jelly to move by dx/dy.
+  # Returns null if there's a wall, an empty array if there's space,
+  # and an array of jellies if there's only jellies in the way.
+  getAdjacent: (jelly, dx, dy) ->
+    jellies = {}
     for [x, y] in jelly.cellCoords()
       next = @cells[y + dy][x + dx]
-      return next if next and next != jelly
-    return false
+      if next and next != jelly
+        return null unless next instanceof Jelly
+        jellies[next.id] = next
+    ids = Object.keys(jellies)
+    return (jellies[id] for id in ids)
 
   checkFall: (cb) ->
     moved = false
@@ -166,8 +193,9 @@ class Stage
     while didOneMove
       didOneMove = false
       for jelly in @jellies
-        if not @checkFilled(jelly, 0, 1)
-          @move(jelly, jelly.x, jelly.y + 1)
+        adjacent = @getAdjacent(jelly, 0, 1)
+        if adjacent? and adjacent.length == 0
+          @move([jelly], 0, 1)
           didOneMove = true
           moved = true
     if moved
@@ -203,7 +231,7 @@ class Stage
           continue unless other != jelly
           continue unless jelly.color == other.color
           jelly.merge other
-          @jellies = @jellies.filter (j) -> j != other
+          @jellies = @jellies.filter (j) -> j.id != other.id
           return jelly
     return null
 
@@ -214,7 +242,7 @@ class JellyCell
 
 
 class Jelly
-  constructor: (stage, @x, @y, @color) ->
+  constructor: (stage, @id, @x, @y, @color) ->
     @dom = document.createElement('div')
     @updatePosition(@x, @y)
     @dom.className = 'cell jellybox'
