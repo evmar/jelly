@@ -119,13 +119,13 @@
       var end, name, names, _i, _len,
         _this = this;
       names = ['transitionend', 'webkitTransitionEnd'];
-      end = function(e) {
+      end = function() {
         var name, _i, _len;
         for (_i = 0, _len = names.length; _i < _len; _i++) {
           name = names[_i];
           _this.dom.removeEventListener(name, end);
         }
-        return cb();
+        return setTimeout(cb, 0);
       };
       for (_i = 0, _len = names.length; _i < _len; _i++) {
         name = names[_i];

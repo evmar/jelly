@@ -135,9 +135,13 @@ class Stage
 
   waitForAnimation: (cb) ->
     names = ['transitionend', 'webkitTransitionEnd']
-    end = (e) =>
+    end = () =>
       @dom.removeEventListener(name, end) for name in names
-      cb()
+      # Wait one call stack before continuing.  This is necessary if there
+      # are multiple pending end transition events (multiple jellies moving);
+      # we want to wait for them all here and not accidentally catch them
+      # in a subsequent waitForAnimation.
+      setTimeout(cb, 0)
     @dom.addEventListener(name, end) for name in names
     return
 
