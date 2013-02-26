@@ -140,24 +140,33 @@ class Stage
     return
 
   trySlide: (jelly, dir) ->
-    return if @checkFilled(jelly, dir, 0)
+    jellies = [jelly]
+    return if @checkFilled(jellies, dir, 0)
     @busy = true
-    @move(jelly, jelly.x + dir, jelly.y)
+    @move(jellies, dir, 0)
     @waitForAnimation () =>
       @checkFall =>
         @checkForMerges()
         @busy = false
 
-  move: (jelly, targetX, targetY) ->
-    @cells[y][x] = null for [x, y] in jelly.cellCoords()
-    jelly.updatePosition(targetX, targetY)
-    @cells[y][x] = jelly for [x, y] in jelly.cellCoords()
+  move: (jellies, dx, dy) ->
+    @cells[y][x] = null for [x, y] in jelly.cellCoords() for jelly in jellies
+    jelly.updatePosition(jelly.x+dx, jelly.y+dy) for jelly in jellies
+    @cells[y][x] = jelly for [x, y] in jelly.cellCoords() for jelly in jellies
     return
 
-  checkFilled: (jelly, dx, dy) ->
-    for [x, y] in jelly.cellCoords()
-      next = @cells[y + dy][x + dx]
-      return next if next and next != jelly
+  checkFilled: (jellies, dx, dy) ->
+    done = false
+    while not done
+      done = true
+      for jelly in jellies
+        for [x, y] in jelly.cellCoords()
+          next = @cells[y + dy][x + dx]
+          if next and next not in jellies
+            return true unless next instanceof Jelly
+            jellies.push next
+            done = false
+            break
     return false
 
   checkFall: (cb) ->
@@ -166,8 +175,8 @@ class Stage
     while didOneMove
       didOneMove = false
       for jelly in @jellies
-        if not @checkFilled(jelly, 0, 1)
-          @move(jelly, jelly.x, jelly.y + 1)
+        if not @checkFilled([jelly], 0, 1)
+          @move([jelly], 0, 1)
           didOneMove = true
           moved = true
     if moved
