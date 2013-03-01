@@ -402,7 +402,7 @@
   for (i = _i = 1, _ref = levels.length; 1 <= _ref ? _i <= _ref : _i >= _ref; i = 1 <= _ref ? ++_i : --_i) {
     option = document.createElement('option');
     option.value = i;
-    option.innerText = "Level " + i;
+    option.textContent = "Level " + i;
     levelPicker.appendChild(option);
   }
 
